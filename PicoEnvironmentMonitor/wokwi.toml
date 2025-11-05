@@ -1,0 +1,40 @@
+[wokwi]
+version = 1
+firmware = "output/PicoEnvironmentMonitor.uf2"
+
+[[parts]]
+type = "pico"
+
+[[parts]]
+type = "led"
+color = "red"
+pin = "16"
+
+[[parts]]
+type = "led" 
+color = "green"
+pin = "17"
+
+[[parts]]
+type = "led"
+color = "blue"
+pin = "18"
+
+[[parts]]
+type = "dht22"
+pin = "15"
+
+[[parts]]
+type = "photoresistor"
+pin = "26"
+
+[[parts]]
+type = "resistor"
+value = "10k"
+pin1 = "26"
+pin2 = "3v3"
+
+[[parts]]
+type = "ssd1306"
+pinSda = "20"
+pinScl = "21"

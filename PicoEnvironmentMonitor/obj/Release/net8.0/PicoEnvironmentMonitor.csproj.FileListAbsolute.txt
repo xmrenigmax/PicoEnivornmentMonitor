@@ -1,0 +1,5 @@
+/home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Release/net8.0/PicoEnvironmentMonitor.csproj.AssemblyReference.cache
+/home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Release/net8.0/PicoEnvironmentMonitor.GeneratedMSBuildEditorConfig.editorconfig
+/home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Release/net8.0/PicoEnvironmentMonitor.AssemblyInfoInputs.cache
+/home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Release/net8.0/PicoEnvironmentMonitor.AssemblyInfo.cs
+/home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Release/net8.0/PicoEnvironmentMonitor.csproj.CoreCompileInputs.cache
