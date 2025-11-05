@@ -75,3 +75,17 @@ Timestamp,Temperature,LightLevel,Humidity,LightCategory,TemperatureStatus,LedCol
 2025-11-05 14:08:45,20.8,0.85,57.4,🔆 Bright,😊 Comfortable,Green,False
 2025-11-05 14:08:47,20.4,0.9,53.6,🔆 Bright,😊 Comfortable,Green,False
 2025-11-05 14:08:49,20.9,0.83,56.5,☀️ Normal,😊 Comfortable,Green,False
+2025-11-05 14:08:51,21.3,0.69,56.1,☀️ Normal,😊 Comfortable,Green,False
+2025-11-05 14:08:53,21.1,0.57,54,☀️ Normal,😊 Comfortable,Green,False
+2025-11-05 14:08:55,21.7,0.48,55.9,☀️ Normal,😊 Comfortable,Green,False
+2025-11-05 14:08:57,21.2,0.32,56.8,💡 Dim,😊 Comfortable,Green,False
+2025-11-05 14:08:59,20.5,0.23,53.7,💡 Dim,😊 Comfortable,Green,False
+2025-11-05 14:09:01,20.1,0.15,51.2,💡 Dim,😊 Comfortable,Purple,False
+2025-11-05 14:09:03,20.6,0.2,55.5,🌙 Dark,😊 Comfortable,Green,False
+2025-11-05 14:09:05,21.3,0.11,53.9,🌙 Dark,😊 Comfortable,Purple,False
+2025-11-05 14:09:07,21.3,0,55.3,🌙 Dark,😊 Comfortable,Purple,True
+2025-11-05 14:09:09,21.5,0,58.3,🌙 Dark,😊 Comfortable,Purple,True
+2025-11-05 14:09:11,21.3,0,60.4,🌙 Dark,😊 Comfortable,Purple,True
+2025-11-05 14:09:13,21,0,57.9,🌙 Dark,😊 Comfortable,Purple,True
+2025-11-05 14:09:15,21.1,0.08,61.1,🌙 Dark,😊 Comfortable,Purple,True
+2025-11-05 14:09:17,21.4,0.14,63.4,💡 Dim,😊 Comfortable,Purple,False

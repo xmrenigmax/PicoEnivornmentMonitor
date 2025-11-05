@@ -38,6 +38,7 @@
 /home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/PicoEnvironmentMonitor.AssemblyInfoInputs.cache
 /home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/PicoEnvironmentMonitor.AssemblyInfo.cs
 /home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/PicoEnvironmentMonitor.csproj.CoreCompileInputs.cache
+/home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/PicoEnvironmentMonitor.sourcelink.json
 /home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/PicoEnvi.A8121F3C.Up2Date
 /home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/PicoEnvironmentMonitor.dll
 /home/xmrenigmax/Documents/hardware/PicoEnvironmentMonitor/obj/Debug/net8.0/refint/PicoEnvironmentMonitor.dll

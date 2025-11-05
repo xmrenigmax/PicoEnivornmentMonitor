@@ -1,0 +1,6 @@
+PicoEnvironmentMonitor/obj
+PicoEnvironmentMonitor/bin
+PicoEnvironmentMonitor/sensor_data.csv
+PicoEnvironmentMonitor/building_metrics.csv
+PicoEnvironmentMonitor/building_status.json
+PicoEnvironmentMonitor/environment_log.csv

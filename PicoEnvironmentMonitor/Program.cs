@@ -1,42 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
-namespace ProfessionalIoTMonitor
+namespace HoneywellBuildingIQ
 {
-    // ==================== INTERFACES ====================
-    public interface ITemperatureSensor
-    {
-        double ReadTemperature();
-        bool TryReadTemperature(out double temperature);
-    }
-
-    public interface ILightSensor
-    {
-        double ReadLightLevel();
-        string GetLightCategory();
-    }
-
-    public interface IHumiditySensor
-    {
-        double ReadHumidity();
-        bool TryReadHumidity(out double humidity);
-    }
-
-    public interface ILedController
-    {
-        void SetColor(string color);
-        string GetCurrentColor();
-    }
-
-    public interface IPerformanceMonitor
-    {
-        SystemStats GetSystemStats();
-        void RecordReading();
-        void RecordAlert();
-    }
-
-    // ==================== MODELS ====================
+    // ==================== CORE MODELS & INTERFACES ====================
     public class SensorReadings
     {
         public double Temperature { get; set; }
@@ -74,7 +43,39 @@ namespace ProfessionalIoTMonitor
         Critical
     }
 
-    // ==================== HARDWARE SIMULATORS ====================
+    // ==================== CORE INTERFACES ====================
+    public interface ITemperatureSensor
+    {
+        double ReadTemperature();
+        bool TryReadTemperature(out double temperature);
+    }
+
+    public interface ILightSensor
+    {
+        double ReadLightLevel();
+        string GetLightCategory();
+    }
+
+    public interface IHumiditySensor
+    {
+        double ReadHumidity();
+        bool TryReadHumidity(out double humidity);
+    }
+
+    public interface ILedController
+    {
+        void SetColor(string color);
+        string GetCurrentColor();
+    }
+
+    public interface IPerformanceMonitor
+    {
+        SystemStats GetSystemStats();
+        void RecordReading();
+        void RecordAlert();
+    }
+
+    // ==================== CORE HARDWARE SIMULATORS ====================
     public class SimulatedTemperatureSensor : ITemperatureSensor
     {
         private readonly Random _random;
@@ -93,7 +94,7 @@ namespace ProfessionalIoTMonitor
 
         public bool TryReadTemperature(out double temperature)
         {
-            if (_random.NextDouble() < 0.05) // 5% failure rate
+            if (_random.NextDouble() < 0.05)
             {
                 temperature = 0;
                 return false;
@@ -149,7 +150,7 @@ namespace ProfessionalIoTMonitor
         public bool TryReadHumidity(out double humidity)
         {
             humidity = ReadHumidity();
-            return _random.NextDouble() > 0.02; // 2% failure rate
+            return _random.NextDouble() > 0.02;
         }
     }
 
@@ -166,7 +167,7 @@ namespace ProfessionalIoTMonitor
         public string GetCurrentColor() => _currentColor;
     }
 
-    // ==================== BUSINESS SERVICES ====================
+    // ==================== CORE BUSINESS SERVICES ====================
     public class EnvironmentMonitorService
     {
         private readonly ITemperatureSensor _tempSensor;
@@ -312,141 +313,428 @@ namespace ProfessionalIoTMonitor
         public void RecordAlert() => _alerts.Add(DateTime.Now);
     }
 
-    public class DataLogger
+    // ==================== HONEYWELL-SPECIFIC MODELS ====================
+    public class BuildingZone
     {
-        private readonly string _csvFile = "sensor_data.csv";
-        private readonly string _jsonFile = "sensor_data.json";
+        public string ZoneId { get; set; } = "Zone-A";
+        public string ZoneName { get; set; } = "Main Office Area";
+        public ZoneType Type { get; set; } = ZoneType.Office;
+        public double TargetTemperature { get; set; } = 22.0;
+        public double TargetHumidity { get; set; } = 45.0;
+    }
 
-        public DataLogger()
+    public enum ZoneType
+    {
+        Office,
+        ServerRoom,
+        Laboratory,
+        Manufacturing,
+        Warehouse
+    }
+
+    public class HVACStatus
+    {
+        public bool IsHeating { get; set; }
+        public bool IsCooling { get; set; }
+        public bool IsVentilating { get; set; }
+        public int FanSpeed { get; set; }
+        public double EnergyConsumption { get; set; }
+    }
+
+    public class EnergyMetrics
+    {
+        public double TotalEnergyUsed { get; set; }
+        public double CarbonFootprint { get; set; }
+        public double EnergyCost { get; set; }
+        public double EfficiencyScore { get; set; }
+    }
+
+    public class ComplianceAlert
+    {
+        public string Regulation { get; set; } = string.Empty;
+        public string Requirement { get; set; } = string.Empty;
+        public ComplianceLevel Level { get; set; }
+        public DateTime DetectedAt { get; set; }
+    }
+
+    public enum ComplianceLevel
+    {
+        Compliant,
+        Warning,
+        Violation
+    }
+
+    // ==================== HONEYWELL-SPECIFIC INTERFACES ====================
+    public interface IHVACController
+    {
+        HVACStatus GetStatus();
+        void SetTemperature(double targetTemp);
+        void OptimizeForOccupancy(int peopleCount);
+        EnergyMetrics GetEnergyMetrics();
+    }
+
+    public interface IOccupancySensor
+    {
+        int GetPeopleCount();
+        bool IsOccupied();
+        DateTime LastMovement { get; }
+    }
+
+    public interface IComplianceChecker
+    {
+        List<ComplianceAlert> CheckRegulations(SensorReadings readings, HVACStatus hvacStatus);
+    }
+
+    // ==================== HONEYWELL-SPECIFIC SERVICES ====================
+    public class SmartHVACController : IHVACController
+    {
+        private readonly Random _random = new();
+        private double _currentEnergy = 0.0;
+        
+        public HVACStatus GetStatus()
+        {
+            return new HVACStatus
+            {
+                IsHeating = _random.NextDouble() > 0.7,
+                IsCooling = _random.NextDouble() > 0.6,
+                IsVentilating = true,
+                FanSpeed = _random.Next(30, 80),
+                EnergyConsumption = Math.Round(_random.NextDouble() * 5.0, 2)
+            };
+        }
+
+        public void SetTemperature(double targetTemp)
+        {
+            Console.WriteLine($"🎯 [HVAC] Set point adjusted to {targetTemp}°C");
+        }
+
+        public void OptimizeForOccupancy(int peopleCount)
+        {
+            var fanSpeed = peopleCount > 10 ? 80 : 50;
+            Console.WriteLine($"👥 [HVAC] Optimized for {peopleCount} occupants - Fan: {fanSpeed}%");
+        }
+
+        public EnergyMetrics GetEnergyMetrics()
+        {
+            _currentEnergy += 0.1;
+            return new EnergyMetrics
+            {
+                TotalEnergyUsed = Math.Round(_currentEnergy, 1),
+                CarbonFootprint = Math.Round(_currentEnergy * 0.233, 2),
+                EnergyCost = Math.Round(_currentEnergy * 0.34, 2),
+                EfficiencyScore = Math.Round(85 + _random.NextDouble() * 15, 1)
+            };
+        }
+    }
+
+    public class OccupancySensor : IOccupancySensor
+    {
+        private readonly Random _random = new();
+        public DateTime LastMovement { get; private set; } = DateTime.Now;
+
+        public int GetPeopleCount()
+        {
+            var hour = DateTime.Now.Hour;
+            int baseCount = hour switch
+            {
+                >= 9 and <= 17 => 15,
+                >= 7 and < 9 => 5,
+                > 17 and <= 20 => 3,
+                _ => 1
+            };
+            
+            return Math.Max(0, baseCount + _random.Next(-3, 4));
+        }
+
+        public bool IsOccupied() => GetPeopleCount() > 0;
+    }
+
+    public class UKComplianceChecker : IComplianceChecker
+    {
+        public List<ComplianceAlert> CheckRegulations(SensorReadings readings, HVACStatus hvacStatus)
+        {
+            var alerts = new List<ComplianceAlert>();
+
+            if (readings.Temperature < 16.0)
+            {
+                alerts.Add(new ComplianceAlert
+                {
+                    Regulation = "UK Workplace Regulations",
+                    Requirement = "Minimum temperature 16°C",
+                    Level = ComplianceLevel.Violation,
+                    DetectedAt = DateTime.Now
+                });
+            }
+
+            if (readings.Temperature > 30.0 && hvacStatus.IsCooling == false)
+            {
+                alerts.Add(new ComplianceAlert 
+                {
+                    Regulation = "HSE Guidelines", 
+                    Requirement = "Cooling required above 30°C",
+                    Level = ComplianceLevel.Warning,
+                    DetectedAt = DateTime.Now
+                });
+            }
+
+            if (readings.Humidity > 70.0)
+            {
+                alerts.Add(new ComplianceAlert
+                {
+                    Regulation = "Building Standards",
+                    Requirement = "Humidity should be 40-70%",
+                    Level = ComplianceLevel.Warning,
+                    DetectedAt = DateTime.Now
+                });
+            }
+
+            if (hvacStatus.EnergyConsumption > 4.0)
+            {
+                alerts.Add(new ComplianceAlert
+                {
+                    Regulation = "Energy Efficiency",
+                    Requirement = "High energy consumption detected",
+                    Level = ComplianceLevel.Warning,
+                    DetectedAt = DateTime.Now
+                });
+            }
+
+            return alerts;
+        }
+    }
+
+    // ==================== ENHANCED BUILDING SERVICES ====================
+    public class BuildingManagementService
+    {
+        private readonly EnvironmentMonitorService _envMonitor;
+        private readonly IHVACController _hvacController;
+        private readonly IOccupancySensor _occupancySensor;
+        private readonly IComplianceChecker _complianceChecker;
+        private readonly AlertSystem _alertSystem;
+
+        public BuildingManagementService(
+            EnvironmentMonitorService envMonitor,
+            IHVACController hvacController,
+            IOccupancySensor occupancySensor,
+            IComplianceChecker complianceChecker,
+            AlertSystem alertSystem)
+        {
+            _envMonitor = envMonitor;
+            _hvacController = hvacController;
+            _occupancySensor = occupancySensor;
+            _complianceChecker = complianceChecker;
+            _alertSystem = alertSystem;
+        }
+
+        public BuildingStatus GetCompleteBuildingStatus()
+        {
+            var envReadings = _envMonitor.GetComprehensiveReading();
+            var hvacStatus = _hvacController.GetStatus();
+            var peopleCount = _occupancySensor.GetPeopleCount();
+            var energyMetrics = _hvacController.GetEnergyMetrics();
+            var complianceAlerts = _complianceChecker.CheckRegulations(envReadings, hvacStatus);
+
+            if (peopleCount > 0)
+            {
+                _hvacController.OptimizeForOccupancy(peopleCount);
+            }
+
+            if (envReadings.Temperature > 25.0 && !hvacStatus.IsCooling)
+            {
+                _hvacController.SetTemperature(22.0);
+            }
+
+            return new BuildingStatus
+            {
+                Environment = envReadings,
+                HVAC = hvacStatus,
+                Occupancy = peopleCount,
+                Energy = energyMetrics,
+                ComplianceAlerts = complianceAlerts,
+                Timestamp = DateTime.Now
+            };
+        }
+    }
+
+    public class BuildingStatus
+    {
+        public SensorReadings Environment { get; set; } = new();
+        public HVACStatus HVAC { get; set; } = new();
+        public int Occupancy { get; set; }
+        public EnergyMetrics Energy { get; set; } = new();
+        public List<ComplianceAlert> ComplianceAlerts { get; set; } = new();
+        public DateTime Timestamp { get; set; }
+    }
+
+    // ==================== ENHANCED DATA LOGGER ====================
+    public class BuildingDataLogger
+    {
+        private readonly string _csvFile = "building_metrics.csv";
+
+        public BuildingDataLogger()
         {
             if (!File.Exists(_csvFile))
             {
-                File.WriteAllText(_csvFile, "Timestamp,Temperature,LightLevel,Humidity,LightCategory,TemperatureStatus,LedColor,IsAlert\n");
+                File.WriteAllText(_csvFile, "Timestamp,Temperature,Humidity,Light,Occupancy,EnergyUsed,EnergyCost,CarbonFootprint,Efficiency,ComplianceAlerts\n");
             }
         }
 
-        public void LogReading(SensorReadings reading)
+        public void LogBuildingData(BuildingStatus status)
         {
-            var csvEntry = $"{reading.Timestamp:yyyy-MM-dd HH:mm:ss},{reading.Temperature},{reading.LightLevel},{reading.Humidity},{reading.LightCategory},{reading.TemperatureStatus},{reading.LedColor},{reading.IsAlert}\n";
+            var csvEntry = $"{status.Timestamp:yyyy-MM-dd HH:mm:ss},{status.Environment.Temperature},{status.Environment.Humidity},{status.Environment.LightLevel},{status.Occupancy},{status.Energy.TotalEnergyUsed},{status.Energy.EnergyCost},{status.Energy.CarbonFootprint},{status.Energy.EfficiencyScore},{status.ComplianceAlerts.Count}\n";
             File.AppendAllText(_csvFile, csvEntry);
 
             if (DateTime.Now.Second % 20 == 0)
             {
-                var jsonEntry = System.Text.Json.JsonSerializer.Serialize(reading, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_jsonFile, jsonEntry);
+                var jsonEntry = JsonSerializer.Serialize(status, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText("building_status.json", jsonEntry);
             }
         }
     }
-
-    public class WebDashboard
+    // Add this class to show predictive capabilities
+    public class PredictiveMaintenance
     {
-        private readonly List<SensorReadings> _recentReadings = new();
-        private const int MAX_HISTORY = 50;
-
-        public void UpdateDashboard(SensorReadings reading)
+        private readonly Dictionary<string, int> _componentHours = new()
         {
-            _recentReadings.Add(reading);
-            if (_recentReadings.Count > MAX_HISTORY)
-                _recentReadings.RemoveAt(0);
+            {"HVAC_Compressor", 2450},
+            {"Air_Handler", 1800},
+            {"Chiller", 3200},
+            {"Boiler", 1500}
+        };
 
-            if (DateTime.Now.Second % 30 == 0)
+        public void CheckMaintenanceNeeds()
+        {
+            var needsMaintenance = _componentHours.Where(x => x.Value > 2000).ToList();
+            if (needsMaintenance.Any() && DateTime.Now.Minute % 5 == 0)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"🌐 [WEB] Dashboard updated - {_recentReadings.Count} readings in history");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"🔧 [PREDICTIVE] Maintenance due: {string.Join(", ", needsMaintenance.Select(x => x.Key))}");
                 Console.ResetColor();
             }
         }
+    }
 
-        public List<SensorReadings> GetRecentReadings() => _recentReadings;
+    // ==================== ENHANCED DASHBOARD ====================
+    public class HoneywellDashboard
+    {
+        public void DisplayBuildingOverview(BuildingStatus status)
+        {
+            if (DateTime.Now.Second % 15 == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("🏢 [HONEYWELL BMS] Building Overview:");
+                Console.WriteLine($"   👥 Occupancy: {status.Occupancy} people");
+                Console.WriteLine($"   💡 Energy: {status.Energy.TotalEnergyUsed} kWh (£{status.Energy.EnergyCost})");
+                Console.WriteLine($"   🌱 Carbon: {status.Energy.CarbonFootprint} kg CO2");
+                Console.WriteLine($"   ⚡ Efficiency: {status.Energy.EfficiencyScore}%");
+                Console.ResetColor();
+            }
+        }
     }
 
     // ==================== MAIN WORKER SERVICE ====================
-    public class MonitoringWorker : BackgroundService
+    public class BuildingMonitoringWorker : BackgroundService
     {
-        private readonly EnvironmentMonitorService _monitorService;
-        private readonly AlertSystem _alertSystem;
-        private readonly DataLogger _dataLogger;
-        private readonly WebDashboard _webDashboard;
+        private readonly BuildingManagementService _buildingService;
+        private readonly BuildingDataLogger _dataLogger;
+        private readonly HoneywellDashboard _dashboard;
         private readonly PerformanceMonitor _perfMonitor;
-        private readonly ILogger<MonitoringWorker> _logger;
+        private readonly ILogger<BuildingMonitoringWorker> _logger;
 
-        public MonitoringWorker(
-            EnvironmentMonitorService monitorService,
-            AlertSystem alertSystem,
-            DataLogger dataLogger,
-            WebDashboard webDashboard,
+        public BuildingMonitoringWorker(
+            BuildingManagementService buildingService,
+            BuildingDataLogger dataLogger,
+            HoneywellDashboard dashboard,
             PerformanceMonitor perfMonitor,
-            ILogger<MonitoringWorker> logger)
+            ILogger<BuildingMonitoringWorker> logger)
         {
-            _monitorService = monitorService;
-            _alertSystem = alertSystem;
+            _buildingService = buildingService;
             _dataLogger = dataLogger;
-            _webDashboard = webDashboard;
+            _dashboard = dashboard;
             _perfMonitor = perfMonitor;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Monitoring worker started");
+            _logger.LogInformation("Honeywell BuildingIQ monitoring started");
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    var readings = _monitorService.GetComprehensiveReading();
+                    var buildingStatus = _buildingService.GetCompleteBuildingStatus();
                     _perfMonitor.RecordReading();
-                    _dataLogger.LogReading(readings);
-                    _webDashboard.UpdateDashboard(readings);
+                    _dataLogger.LogBuildingData(buildingStatus);
+                    _dashboard.DisplayBuildingOverview(buildingStatus);
 
-                    DisplayEnhancedStatus(readings, _perfMonitor.GetSystemStats());
-
-                    await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                    DisplayHoneywellStatus(buildingStatus);
+                    
+                    await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error in monitoring loop");
+                    _logger.LogError(ex, "Error in building monitoring loop");
                 }
             }
         }
 
-        private void DisplayEnhancedStatus(SensorReadings readings, SystemStats stats)
+        private void DisplayHoneywellStatus(BuildingStatus status)
         {
             Console.Clear();
-
+            
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=== 🏢 HONEYWELL BuildingIQ DEMO ===");
+            Console.ResetColor();
+            
+            Console.WriteLine($"🕒 {status.Timestamp:HH:mm:ss} | 📊 Readings: {_perfMonitor.GetSystemStats().TotalReadings}");
+            Console.WriteLine("=========================================");
+            
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("=== 🚀 PROFESSIONAL IOT MONITOR ===");
+            Console.WriteLine("🌡️  ENVIRONMENTAL DATA");
             Console.ResetColor();
-
-            Console.WriteLine($"🕒 {readings.Timestamp:HH:mm:ss} | 📊 Readings: {stats.TotalReadings} | ⚠️ Alerts: {stats.AlertsTriggered}");
-            Console.WriteLine("----------------------------------------");
-
-            Console.ForegroundColor = readings.Temperature > 30 ? ConsoleColor.Red :
-                                    readings.Temperature < 15 ? ConsoleColor.Blue : ConsoleColor.Green;
-            Console.WriteLine($"🌡️  Temperature: {readings.Temperature}°C - {readings.TemperatureStatus}");
+            Console.WriteLine($"Temperature: {status.Environment.Temperature}°C - {status.Environment.TemperatureStatus}");
+            Console.WriteLine($"Humidity: {status.Environment.Humidity}% - {status.Environment.HumidityStatus}");
+            Console.WriteLine($"Light: {status.Environment.LightLevel:P0} - {status.Environment.LightCategory}");
+            
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n❄️  HVAC STATUS");
             Console.ResetColor();
-
-            Console.ForegroundColor = readings.Humidity > 70 ? ConsoleColor.Yellow : ConsoleColor.Green;
-            Console.WriteLine($"💧 Humidity: {readings.Humidity}% - {readings.HumidityStatus}");
+            Console.WriteLine($"Heating: {(status.HVAC.IsHeating ? "ON 🔥" : "OFF")}");
+            Console.WriteLine($"Cooling: {(status.HVAC.IsCooling ? "ON ❄️" : "OFF")}");
+            Console.WriteLine($"Ventilation: {(status.HVAC.IsVentilating ? "ON 💨" : "OFF")}");
+            Console.WriteLine($"Fan Speed: {status.HVAC.FanSpeed}%");
+            Console.WriteLine($"Energy Use: {status.HVAC.EnergyConsumption} kWh");
+            
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n📈 BUSINESS INTELLIGENCE");
             Console.ResetColor();
-
-            Console.WriteLine($"💡 Light: {readings.LightLevel:P0} - {readings.LightCategory}");
-            Console.WriteLine($"🎨 LED: {readings.LedColor} | 🔔 Alerts: {(readings.IsAlert ? "ACTIVE" : "None")}");
-            Console.WriteLine($"⏱️  Uptime: {stats.UptimeMinutes:F1}m | 📈 Avg Interval: {stats.AverageReadIntervalMs:F0}ms");
-
-            var activeAlerts = _alertSystem.GetActiveAlerts();
-            if (activeAlerts.Any())
+            Console.WriteLine($"Occupancy: {status.Occupancy} people");
+            Console.WriteLine($"Total Energy: {status.Energy.TotalEnergyUsed} kWh");
+            Console.WriteLine($"Energy Cost: £{status.Energy.EnergyCost}");
+            Console.WriteLine($"Carbon Footprint: {status.Energy.CarbonFootprint} kg CO2");
+            Console.WriteLine($"Efficiency Score: {status.Energy.EfficiencyScore}%");
+            
+            if (status.ComplianceAlerts.Any())
             {
-                Console.WriteLine("\n🚨 ACTIVE ALERTS:");
-                foreach (var alert in activeAlerts.Take(3))
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n⚖️  COMPLIANCE ALERTS: {status.ComplianceAlerts.Count}");
+                Console.ResetColor();
+                foreach (var alert in status.ComplianceAlerts.Take(2))
                 {
-                    Console.ForegroundColor = alert.Level == AlertLevel.Critical ? ConsoleColor.Red : ConsoleColor.Yellow;
-                    Console.WriteLine($"   • {alert.Message}");
+                    var icon = alert.Level == ComplianceLevel.Violation ? "🚨" : "⚠️";
+                    Console.WriteLine($"{icon} {alert.Regulation}: {alert.Requirement}");
                 }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\n✅ COMPLIANCE: All regulations met");
                 Console.ResetColor();
             }
-
-            Console.WriteLine("\nPress Ctrl+C to exit | Professional IoT System v1.0");
+            
+            Console.WriteLine($"\n📍 Honeywell Poole Demo | BuildingIQ v2.0");
+            Console.WriteLine("Press Ctrl+C to exit");
         }
     }
 
@@ -455,11 +743,11 @@ namespace ProfessionalIoTMonitor
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("🚀 Professional IoT Environment Monitor");
-            Console.WriteLine("========================================\n");
+            Console.WriteLine("🏢 Honeywell BuildingIQ - Poole Interview Demo");
+            Console.WriteLine("===============================================\n");
 
             var host = CreateHostBuilder(args).Build();
-            DisplayStartupBanner();
+            DisplayHoneywellBanner();
             await host.RunAsync();
         }
 
@@ -467,38 +755,53 @@ namespace ProfessionalIoTMonitor
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((context, services) =>
                 {
+                    // Core sensors
                     services.AddSingleton<ITemperatureSensor, SimulatedTemperatureSensor>();
                     services.AddSingleton<ILightSensor, SimulatedLightSensor>();
                     services.AddSingleton<IHumiditySensor, SimulatedHumiditySensor>();
                     services.AddSingleton<ILedController, SimulatedLedController>();
-
+                    
+                    // Honeywell-specific services
+                    services.AddSingleton<IHVACController, SmartHVACController>();
+                    services.AddSingleton<IOccupancySensor, OccupancySensor>();
+                    services.AddSingleton<IComplianceChecker, UKComplianceChecker>();
+                    
+                    // Business services
                     services.AddSingleton<PerformanceMonitor>();
                     services.AddSingleton<AlertSystem>();
-                    services.AddSingleton<DataLogger>();
-                    services.AddSingleton<WebDashboard>();
                     services.AddSingleton<EnvironmentMonitorService>();
-
-                    services.AddHostedService<MonitoringWorker>();
+                    services.AddSingleton<BuildingManagementService>();
+                    services.AddSingleton<BuildingDataLogger>();
+                    services.AddSingleton<HoneywellDashboard>();
+                    
+                    // Main worker
+                    services.AddHostedService<BuildingMonitoringWorker>();
                 });
 
-        static void DisplayStartupBanner()
+        static void DisplayHoneywellBanner()
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(@"
-    ╔═══════════════════════════════════════════╗
-    ║          PROFESSIONAL IoT MONITOR         ║
-    ║           Hardware Interview Demo         ║
-    ║                                           ║
-    ║  🌡️  Temperature Monitoring              ║
-    ║  💡 Light Level Detection                ║
-    ║  💧 Humidity Tracking                    ║
-    ║  🚨 Smart Alert System                   ║
-    ║  📊 Web Dashboard                        ║
-    ║  📈 Performance Metrics                  ║
-    ╚═══════════════════════════════════════════╝
+    ╔══════════════════════════════════════════════╗
+    ║            HONEYWELL BuildingIQ              ║
+    ║           Poole Interview Demo               ║
+    ║                                              ║
+    ║  🏢  Smart Building Management              ║
+    ║  🌡️   HVAC Control & Optimization           ║
+    ║  💡  Energy Efficiency Monitoring           ║
+    ║  👥  Occupancy-Based Automation             ║
+    ║  ⚖️   UK Regulatory Compliance              ║
+    ║  📊  Real-time Business Intelligence        ║
+    ╚══════════════════════════════════════════════╝
             ");
             Console.ResetColor();
-            Console.WriteLine("Starting services...\n");
+            Console.WriteLine("Initializing Building Management System...\n");
+            Console.WriteLine("📍 Demonstrating skills relevant to Honeywell Poole:");
+            Console.WriteLine("   • Building Automation Systems (BAS)");
+            Console.WriteLine("   • HVAC Control Logic");
+            Console.WriteLine("   • Energy Management");
+            Console.WriteLine("   • Regulatory Compliance");
+            Console.WriteLine("   • Real-time Monitoring\n");
         }
     }
 }

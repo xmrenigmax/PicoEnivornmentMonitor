@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PicoEnvironmentMonitor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b7e5c75d038daaff273dfc4686d12ae0e15fa679")]
 [assembly: System.Reflection.AssemblyProductAttribute("PicoEnvironmentMonitor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PicoEnvironmentMonitor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
